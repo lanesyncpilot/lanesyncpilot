@@ -1,0 +1,40 @@
+{
+  "carrier": "AT&T",
+  "profiles": {
+    "consumer": {
+      "description": "AT&T phone/tablet data (most comma + AT&T SIM setups)",
+      "apn": "broadband",
+      "roaming": false,
+      "metered": false,
+      "username": "",
+      "password": ""
+    },
+    "nxtgenphone": {
+      "description": "Alternate AT&T smartphone APN",
+      "apn": "nxtgenphone",
+      "roaming": false,
+      "metered": false
+    },
+    "iot_m2m": {
+      "description": "AT&T IoT / M2M business SIM (check your plan sheet)",
+      "apn": "PRODATA",
+      "roaming": false,
+      "metered": false
+    },
+    "firstnet": {
+      "description": "FirstNet (public safety) where applicable",
+      "apn": "firstnet-broadband",
+      "roaming": false,
+      "metered": false
+    }
+  },
+  "default_profile": "consumer",
+  "wifi_hotspot": {
+    "enabled": true,
+    "description": "Comma WiFi hotspot so iPhone can reach phonenavd/v2id on 7710/7701"
+  },
+  "v2i_ports": {
+    "v2i_udp": 7701,
+    "phone_nav_http": 7710
+  }
+}

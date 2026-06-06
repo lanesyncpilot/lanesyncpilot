@@ -1,0 +1,34 @@
+.DS_Store
+.env
+*.pem
+
+# Android build artifacts
+lanesync-pilot/mobile/android/.gradle/
+lanesync-pilot/mobile/android/**/build/
+lanesync-pilot/mobile/android/local.properties
+lanesync-pilot/mobile/android/.idea/workspace.xml
+lanesync-pilot/mobile/android/.idea/usage.statistics.xml
+
+# openpilot build / cache (see lanesync-pilot/.gitignore)
+lanesync-pilot/venv/
+lanesync-pilot/.venv/
+lanesync-pilot/.ci_cache
+lanesync-pilot/.cache/
+lanesync-pilot/bin/
+lanesync-pilot/build/
+lanesync-pilot/cereal/gen/
+lanesync-pilot/cereal/services.h
+lanesync-pilot/.coverage*
+lanesync-pilot/htmlcov/
+lanesync-pilot/.claude/
+lanesync-pilot/.context/
+lanesync-pilot/PLAN.md
+lanesync-pilot/TASK.md
+
+# preserved local openpilot git history (not uploaded)
+lanesync-pilot/.git.openpilot-backup/
+
+# device keys — never publish
+lanesync-pilot/system/hardware/tici/id_rsa
+**/id_rsa
+**/*.pem

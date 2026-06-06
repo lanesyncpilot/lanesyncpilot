@@ -6,21 +6,24 @@ An [openpilot](https://github.com/commaai/openpilot) fork with **V2I** (Vehicle-
 
 ```
 V2I-for-Comma/
-├── lanesync-pilot/     # openpilot v0.11.0 fork (LaneSync Pilot)
-│   ├── system/v2i/     # V2I + phone nav daemons
-│   ├── tools/v2i/      # Simulators, HUD mockup, iOS setup
-│   └── att/            # AT&T data plan configs
-└── README.md           # This file
+└── lanesync-pilot/     # openpilot v0.11.0 fork (LaneSync Pilot)
+    ├── mobile/
+    │   ├── android/    # Android app (dashcam, safety, Android Auto UI)
+    │   └── ios/        # iOS stub (you implement)
+    ├── system/v2i/     # V2I + phone nav daemons
+    ├── system/dashcam/ # Saved dashcam HTTP API (dashcamd)
+    ├── tools/v2i/      # Simulators, HUD mockup, iOS Shortcut setup
+    └── att/            # AT&T data plan configs
 ```
 
 ## Features
 
 - **V2I** — RSU traffic signals, speed advisories, hazards via UDP; planner + HUD integration
-- **Navigation** — iPhone/CarPlay bridge sends turn-by-turn to comma over Wi‑Fi
+- **Navigation** — iPhone/CarPlay bridge sends turn-by-turn to comma over Wi‑Fi; Android app uses Android Auto
+- **Dashcam** — Android app streams/downloads bookmark-saved clips via `dashcamd` (cloud: E2E encrypted, 7-day account storage)
+- **Speed limit follow** — Car follows posted speed limits
 - **Connectivity** — Wi‑Fi hotspot + AT&T / T-Mobile / Verizon LTE for phone ↔ device link
 - **Version** — LaneSync Pilot `1.0.0` (shown on device home screen)
-- **Speed Limit Follow** - Makes the Car follow the speed limit 
-- **Dashcam** - Comming later will be a Video Downloader and have them on End to End Encrypted but Account Neccessary to store for 7 days then download it to save it after 7 days
 
 ## Get started
 

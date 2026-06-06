@@ -1,0 +1,40 @@
+{
+  "carrier": "T-Mobile",
+  "profiles": {
+    "consumer": {
+      "description": "T-Mobile phone/tablet data (most comma + T-Mobile SIM setups)",
+      "apn": "fast.t-mobile.com",
+      "roaming": false,
+      "metered": false,
+      "username": "",
+      "password": ""
+    },
+    "wholesale": {
+      "description": "T-Mobile wholesale / MVNO SIMs",
+      "apn": "wholesale",
+      "roaming": false,
+      "metered": false
+    },
+    "iot_m2m": {
+      "description": "T-Mobile IoT / M2M business SIM (check your plan sheet)",
+      "apn": "iot.tmowholesale.com",
+      "roaming": false,
+      "metered": false
+    },
+    "firstnet": {
+      "description": "FirstNet on T-Mobile where applicable",
+      "apn": "firstnet-broadband",
+      "roaming": false,
+      "metered": false
+    }
+  },
+  "default_profile": "consumer",
+  "wifi_hotspot": {
+    "enabled": true,
+    "description": "Comma WiFi hotspot so iPhone can reach phonenavd/v2id on 7710/7701"
+  },
+  "v2i_ports": {
+    "v2i_udp": 7701,
+    "phone_nav_http": 7710
+  }
+}

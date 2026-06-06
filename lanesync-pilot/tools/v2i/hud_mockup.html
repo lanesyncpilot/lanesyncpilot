@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LaneSync Pilot HUD mockup</title>
+  <style>
+    :root {
+      --engaged: #80d8a6;
+      --engaged-bg: rgba(128, 216, 166, 0.85);
+      --grey: #a6a6a6;
+      --hud-black: rgba(0, 0, 0, 0.65);
+      --border: rgba(255, 255, 255, 0.29);
+      --red: #dc3232;
+      --yellow: #e6c828;
+      --green: #32c85a;
+      --lamp-off: rgba(60, 60, 60, 0.78);
+      --hazard: rgba(200, 120, 0, 0.9);
+      --carplay-blue: #5ac8fa;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #0d1117;
+      color: #e6edf3;
+      font-family: "Inter", "SF Pro Display", system-ui, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px 40px;
+      gap: 16px;
+    }
+
+    h1 { font-size: 1.1rem; font-weight: 600; }
+    .subtitle { font-size: 0.85rem; opacity: 0.55; max-width: 560px; text-align: center; line-height: 1.5; }
+
+    .status-bar {
+      width: min(960px, 100%);
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid #30363d;
+      background: #161b22;
+    }
+    .status-bar.ok { border-color: #3fb950; color: #3fb950; }
+    .status-bar.err { border-color: #f85149; color: #f85149; }
+    .status-bar.local { border-color: #58a6ff; color: #58a6ff; }
+
+    .device-frame {
+      width: min(960px, 100%);
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 0 0 3px #1a1f26, 0 24px 80px rgba(0, 0, 0, 0.55);
+      position: relative;
+      background: #1a2332;
+    }
+
+    .road {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 68%, rgba(0,0,0,0.4) 100%),
+        linear-gradient(90deg, #2a3544 0%, #3d4f62 35%, #4a5f75 50%, #3d4f62 65%, #2a3544 100%);
+    }
+
+    .lane-lines {
+      position: absolute;
+      inset: 0;
+      opacity: 0.45;
+      background: linear-gradient(90deg, transparent 49%, rgba(255,255,255,0.35) 49%, rgba(255,255,255,0.35) 51%, transparent 51%);
+      transform: perspective(500px) rotateX(14deg) scaleY(1.5);
+      transform-origin: center 85%;
+    }
+
+    .header-gradient {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 30%;
+      background: linear-gradient(180deg, rgba(0,0,0,0.5), transparent);
+      pointer-events: none;
+    }
+
+    .set-speed {
+      position: absolute;
+      left: 4.2%;
+      top: 5.5%;
+      width: 140px;
+      height: 136px;
+      background: var(--hud-black);
+      border: 3px solid var(--border);
+      border-radius: 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 18px;
+      z-index: 2;
+    }
+    .set-speed .label { font-size: 13px; font-weight: 600; color: var(--engaged); letter-spacing: 0.12em; }
+    .set-speed.disengaged .label { color: var(--grey); }
+    .set-speed .value { font-size: 52px; font-weight: 700; color: #fff; line-height: 1; margin-top: 6px; }
+
+    .current-speed {
+      position: absolute;
+      left: 50%;
+      top: 24%;
+      transform: translateX(-50%);
+      text-align: center;
+      z-index: 1;
+    }
+    .current-speed .value {
+      font-size: clamp(64px, 8vw, 88px);
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .current-speed .unit { font-size: 20px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+
+    /* Phone nav — fixed layout: no overlapping ETA */
+    .phone-nav {
+      position: absolute;
+      left: 50%;
+      top: 3%;
+      transform: translateX(-50%);
+      width: min(88%, 480px);
+      background: rgba(0, 0, 0, 0.72);
+      border-radius: 12px;
+      padding: 10px 14px 11px;
+      z-index: 5;
+      display: none;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .phone-nav.visible { display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; gap: 2px 16px; align-items: start; }
+
+    .phone-nav .row-top { grid-column: 1; display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .phone-nav .carplay-icon {
+      flex-shrink: 0;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 5px;
+      padding: 3px 7px;
+      color: var(--carplay-blue);
+    }
+    .phone-nav .dest {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .phone-nav .eta {
+      grid-column: 2;
+      grid-row: 1 / 3;
+      align-self: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--engaged);
+      white-space: nowrap;
+      padding-left: 4px;
+    }
+    .phone-nav .maneuver {
+      grid-column: 1;
+      font-size: 13px;
+      color: rgba(255,255,255,0.72);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .v2i-signal {
+      position: absolute;
+      left: 3.1%;
+      top: 46%;
+      z-index: 3;
+      transition: opacity 0.3s;
+    }
+    .v2i-signal.hidden { opacity: 0; pointer-events: none; }
+    .v2i-signal .distance { font-size: 15px; color: rgba(255,255,255,0.72); margin-bottom: 8px; }
+    .signal-housing {
+      background: rgba(0, 0, 0, 0.58);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    .lamp {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--lamp-off);
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .lamp.on-red { background: var(--red); box-shadow: 0 0 16px rgba(220,50,50,0.8); }
+    .lamp.on-yellow { background: var(--yellow); box-shadow: 0 0 14px rgba(230,200,40,0.7); }
+    .lamp.on-green { background: var(--green); box-shadow: 0 0 14px rgba(50,200,90,0.7); }
+    .lamp.flashing { animation: flash 0.85s ease-in-out infinite; outline: 2px solid #fff; outline-offset: 2px; }
+    @keyframes flash { 50% { opacity: 0.3; } }
+    .ttc { font-size: 16px; font-weight: 600; color: #fff; min-height: 20px; }
+
+    .hazard-badge {
+      position: absolute;
+      left: 50%;
+      top: 54%;
+      transform: translateX(-50%);
+      background: var(--hazard);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      padding: 9px 16px;
+      border-radius: 8px;
+      display: none;
+      z-index: 4;
+    }
+    .hazard-badge.visible { display: block; }
+
+    .exp-btn {
+      position: absolute;
+      right: 3%;
+      top: 4.5%;
+      width: 68px; height: 68px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.4);
+      font-size: 11px;
+      color: rgba(255,255,255,0.45);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .status-pill {
+      position: absolute;
+      bottom: 4%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--engaged-bg);
+      color: #0a1a12;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      z-index: 2;
+    }
+    .status-pill.disengaged { background: rgba(145,155,149,0.9); color: #1a1a1a; }
+
+    .controls {
+      width: min(960px, 100%);
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 18px 20px;
+      display: grid;
+      gap: 12px;
+    }
+    .controls h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.45; }
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    button, select, input[type="text"] {
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      background: #21262d;
+      color: #e6edf3;
+    }
+    button { cursor: pointer; }
+    button:hover { background: #30363d; }
+    button.active { background: var(--engaged); color: #0d1f14; border-color: var(--engaged); }
+    label { font-size: 0.85rem; opacity: 0.75; }
+    input[type="range"] { width: 110px; }
+    input[type="text"] { flex: 1; min-width: 140px; }
+  </style>
+</head>
+<body>
+  <h1>openpilot V2I + CarPlay HUD</h1>
+  <p class="subtitle">Interactive preview. Use <strong>Local preview</strong> or connect to a comma device running <code>phonenavd</code> / <code>v2id</code>.</p>
+
+  <div class="status-bar local" id="statusBar">● Local preview — changes update instantly</div>
+
+  <div class="device-frame" id="hud">
+    <div class="road"></div>
+    <div class="lane-lines"></div>
+    <div class="header-gradient"></div>
+
+    <div class="set-speed engaged" id="setSpeedBox">
+      <span class="label">MAX</span>
+      <span class="value" id="setSpeedVal">65</span>
+    </div>
+
+    <div class="current-speed">
+      <div class="value" id="currentSpeed">68</div>
+      <div class="unit" id="speedUnit">km/h</div>
+    </div>
+
+    <div class="phone-nav visible" id="phoneNav">
+      <div class="row-top">
+        <span class="carplay-icon" id="carplayBadge">CarPlay</span>
+        <span class="dest" id="navDest">1 Infinite Loop, Cupertino</span>
+      </div>
+      <span class="eta" id="navEta">4.2 km · 8 min</span>
+      <div class="maneuver" id="navManeuver">Continue on I-280 South</div>
+    </div>
+
+    <div class="v2i-signal" id="v2iBlock">
+      <div class="distance" id="distanceLabel">42m</div>
+      <div class="signal-housing">
+        <div class="lamp" id="lampRed"></div>
+        <div class="lamp" id="lampYellow"></div>
+        <div class="lamp" id="lampGreen"></div>
+        <div class="ttc" id="ttcLabel">8s</div>
+      </div>
+    </div>
+
+    <div class="hazard-badge" id="hazardBadge">WORK ZONE</div>
+    <div class="exp-btn">EXP</div>
+    <div class="status-pill engaged" id="statusPill">ENGAGED</div>
+  </div>
+
+  <div class="controls">
+    <h2>Connection</h2>
+    <div class="row">
+      <label>Mode</label>
+      <button type="button" id="modeLocal" class="active">Local preview</button>
+      <button type="button" id="modeLive">Live device</button>
+    </div>
+    <div class="row" id="liveRow" style="display:none">
+      <label>Comma IP</label>
+      <input type="text" id="commaIp" placeholder="192.168.0.42" value="192.168.0.42" />
+      <button type="button" id="connectBtn">Connect</button>
+      <button type="button" id="pushNavBtn">Push nav to device</button>
+      <button type="button" id="pushV2iBtn">Push V2I to device</button>
+    </div>
+
+    <h2>V2I signal</h2>
+    <div class="row">
+      <button type="button" data-signal="red" class="active">Red</button>
+      <button type="button" data-signal="yellow">Yellow</button>
+      <button type="button" data-signal="green">Green</button>
+      <button type="button" data-signal="flashing_red">Flash red</button>
+      <button type="button" data-signal="hidden">Hide V2I</button>
+    </div>
+    <div class="row">
+      <label>Countdown</label>
+      <input type="range" id="ttc" min="0" max="30" value="8" />
+      <span id="ttcVal">8s</span>
+      <label><input type="checkbox" id="ttcTick" checked /> Auto countdown</label>
+    </div>
+    <div class="row">
+      <label>Distance</label>
+      <input type="range" id="dist" min="5" max="200" value="42" />
+      <span id="distVal">42 m</span>
+      <label><input type="checkbox" id="metric" checked /> Metric</label>
+    </div>
+    <div class="row">
+      <label>Hazard</label>
+      <select id="hazard">
+        <option value="none">None</option>
+        <option value="work_zone">Work zone</option>
+        <option value="congestion">Congestion</option>
+      </select>
+    </div>
+
+    <h2>iPhone / CarPlay nav</h2>
+    <div class="row">
+      <label><input type="checkbox" id="phoneNavOn" checked /> Show banner</label>
+      <label><input type="checkbox" id="carplayOn" checked /> CarPlay</label>
+    </div>
+    <div class="row">
+      <input type="text" id="navDestInput" value="1 Infinite Loop, Cupertino" placeholder="Destination" />
+    </div>
+    <div class="row">
+      <input type="text" id="navManeuverInput" value="Continue on I-280 South" placeholder="Next maneuver" />
+    </div>
+
+    <h2>Demo</h2>
+    <div class="row">
+      <button type="button" id="toggleEngaged" class="active">Engaged</button>
+      <button type="button" id="runDemo">▶ Full demo (V2I + nav)</button>
+      <button type="button" id="stopDemo">■ Stop</button>
+    </div>
+  </div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+    const lamps = { red: $('lampRed'), yellow: $('lampYellow'), green: $('lampGreen') };
+
+    const state = {
+      signal: 'red',
+      ttc: 8,
+      distM: 42,
+      metric: true,
+      hazard: 'none',
+      demoTimer: null,
+      tickTimer: null,
+      live: false,
+      commaIp: '192.168.0.42',
+    };
+
+    const hazardLabels = { work_zone: 'WORK ZONE', congestion: 'CONGESTION', weather: 'WEATHER', emergency: 'EMERGENCY' };
+
+    function setStatus(msg, type) {
+      const bar = $('statusBar');
+      bar.textContent = msg;
+      bar.className = 'status-bar ' + type;
+    }
+
+    function formatDist(m, metric) {
+      if (metric) return m >= 1000 ? (m / 1000).toFixed(1) + ' km' : Math.round(m) + ' m';
+      const ft = m * 3.28084;
+      return ft >= 5280 ? (ft / 5280).toFixed(1) + ' mi' : Math.round(ft) + ' ft';
+    }
+
+    function formatEta(distM, metric) {
+      const mins = Math.max(1, Math.round(distM / 500));
+      return formatDist(distM, metric) + ' · ' + mins + ' min';
+    }
+
+    function renderHud() {
+      const metric = $('metric').checked;
+      state.metric = metric;
+      state.ttc = +$('ttc').value;
+      state.distM = +$('dist').value;
+
+      $('ttcVal').textContent = state.ttc + 's';
+      $('distVal').textContent = Math.round(state.distM) + (metric ? ' m' : ' m');
+      $('speedUnit').textContent = metric ? 'km/h' : 'mph';
+      $('currentSpeed').textContent = metric ? '68' : '42';
+
+      $('distanceLabel').textContent = metric ? Math.round(state.distM) + 'm' : Math.round(state.distM * 3.28084) + 'ft';
+      $('ttcLabel').textContent = state.ttc > 0 ? state.ttc + 's' : '—';
+      $('ttcLabel').style.visibility = state.ttc > 0 ? 'visible' : 'hidden';
+
+      Object.values(lamps).forEach(l => { l.className = 'lamp'; });
+      const v2i = $('v2iBlock');
+      if (state.signal === 'hidden') {
+        v2i.classList.add('hidden');
+      } else {
+        v2i.classList.remove('hidden');
+        const map = {
+          red: ['red', 'on-red'],
+          yellow: ['yellow', 'on-yellow'],
+          green: ['green', 'on-green'],
+          flashing_red: ['red', 'on-red', 'flashing'],
+        };
+        const [k, ...cls] = map[state.signal] || [];
+        if (k) lamps[k].className = 'lamp ' + cls.join(' ');
+      }
+
+      const hazard = $('hazard').value;
+      state.hazard = hazard;
+      if (hazard !== 'none' && state.signal !== 'hidden') {
+        $('hazardBadge').textContent = hazardLabels[hazard] || 'HAZARD';
+        $('hazardBadge').classList.add('visible');
+      } else {
+        $('hazardBadge').classList.remove('visible');
+      }
+
+      const showNav = $('phoneNavOn').checked;
+      $('phoneNav').classList.toggle('visible', showNav);
+      $('carplayBadge').style.display = $('carplayOn').checked ? 'inline-block' : 'none';
+      const dest = $('navDestInput').value.trim() || 'Destination';
+      $('navDest').textContent = dest;
+      $('navManeuver').textContent = $('navManeuverInput').value.trim();
+      $('navEta').textContent = formatEta(state.distM * 20, metric);
+    }
+
+    function useProxy() {
+      return window.location.port === '8765';
+    }
+
+    async function pushNavToDevice() {
+      const ip = $('commaIp').value.trim();
+      const body = {
+        comma_ip: ip,
+        source: 'carplay',
+        carplay_connected: $('carplayOn').checked,
+        active: $('phoneNavOn').checked,
+        destination: $('navDestInput').value.trim(),
+        dest_lat: 37.3318,
+        dest_lon: -122.0312,
+        distance_remaining_m: state.distM * 20,
+        time_remaining_s: Math.round(state.distM / 500) * 60,
+        maneuver: $('navManeuverInput').value.trim(),
+      };
+      try {
+        const r = await fetch(useProxy() ? '/api/nav' : `http://${ip}:7710/nav`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify((() => {
+            const b = { ...body };
+            if (!useProxy()) delete b.comma_ip;
+            return b;
+          })()),
+        });
+        const j = await r.json();
+        if (j.ok) setStatus('● Pushed navigation to ' + ip, 'ok');
+        else throw new Error(j.error || 'failed');
+      } catch (e) {
+        setStatus('● Nav failed — run: python3 tools/v2i/hud_mockup_server.py --comma-ip ' + ip, 'err');
+      }
+    }
+
+    async function pushV2iToDevice() {
+      const ip = $('commaIp').value.trim();
+      const signals = { red: 'red', yellow: 'yellow', green: 'green', flashing_red: 'flashing_red' };
+      const body = {
+        comma_ip: ip,
+        type: 'spat',
+        signal: signals[state.signal] || 'red',
+        time_to_change: state.ttc,
+        distance_m: state.distM,
+        intersection_id: 'mockup-1',
+      };
+      try {
+        if (!useProxy()) throw new Error('proxy');
+        const r = await fetch('/api/v2i', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const j = await r.json();
+        if (j.ok) setStatus('● V2I sent to ' + ip, 'ok');
+        else throw new Error(j.error);
+      } catch (e) {
+        setStatus('● V2I failed — use hud_mockup_server.py or v2i_sender.py', 'err');
+      }
+    }
+
+    async function connectDevice() {
+      const ip = $('commaIp').value.trim();
+      state.commaIp = ip;
+      try {
+        const url = useProxy() ? `/api/health?ip=${encodeURIComponent(ip)}` : `http://${ip}:7710/health`;
+        const r = await fetch(url);
+        const j = await r.json();
+        if (j.ok) {
+          setStatus('● Connected to comma @ ' + ip, 'ok');
+          state.live = true;
+        } else throw new Error(j.error);
+      } catch (e) {
+        setStatus('● Start: python3 tools/v2i/hud_mockup_server.py --comma-ip ' + ip, 'err');
+        state.live = false;
+      }
+    }
+
+    function startTtcTick() {
+      stopTtcTick();
+      if (!$('ttcTick').checked) return;
+      state.tickTimer = setInterval(() => {
+        if (state.ttc > 0) {
+          state.ttc -= 1;
+          $('ttc').value = state.ttc;
+          renderHud();
+          if (state.ttc === 0 && state.signal === 'red') {
+            state.signal = 'yellow';
+            state.ttc = 3;
+            $('ttc').value = 3;
+            document.querySelectorAll('[data-signal]').forEach(b =>
+              b.classList.toggle('active', b.dataset.signal === 'yellow'));
+            renderHud();
+          } else if (state.ttc === 0 && state.signal === 'yellow') {
+            state.signal = 'green';
+            state.ttc = 15;
+            $('ttc').value = 15;
+            document.querySelectorAll('[data-signal]').forEach(b =>
+              b.classList.toggle('active', b.dataset.signal === 'green'));
+            renderHud();
+          }
+        }
+      }, 1000);
+    }
+
+    function stopTtcTick() {
+      if (state.tickTimer) clearInterval(state.tickTimer);
+      state.tickTimer = null;
+    }
+
+    function stopDemo() {
+      if (state.demoTimer) clearInterval(state.demoTimer);
+      state.demoTimer = null;
+      stopTtcTick();
+      startTtcTick();
+    }
+
+    function runFullDemo() {
+      stopDemo();
+      const steps = [
+        { signal: 'red', ttc: 8, dist: 45, hazard: 'none', maneuver: 'Stop at signal' },
+        { signal: 'red', ttc: 4, dist: 28, hazard: 'none', maneuver: 'Approaching intersection' },
+        { signal: 'yellow', ttc: 3, dist: 18, hazard: 'none', maneuver: 'Prepare to go' },
+        { signal: 'green', ttc: 20, dist: 10, hazard: 'none', maneuver: 'Continue on I-280 South' },
+        { signal: 'green', ttc: 12, dist: 90, hazard: 'work_zone', maneuver: 'Merge left — work zone ahead' },
+      ];
+      let i = 0;
+      const apply = () => {
+        const s = steps[i % steps.length];
+        state.signal = s.signal;
+        state.ttc = s.ttc;
+        state.distM = s.dist;
+        $('ttc').value = s.ttc;
+        $('dist').value = s.dist;
+        $('hazard').value = s.hazard;
+        $('navManeuverInput').value = s.maneuver;
+        document.querySelectorAll('[data-signal]').forEach(b =>
+          b.classList.toggle('active', b.dataset.signal === s.signal));
+        renderHud();
+        if (state.live) pushNavToDevice();
+        i++;
+      };
+      apply();
+      state.demoTimer = setInterval(apply, 2800);
+    }
+
+    document.querySelectorAll('[data-signal]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-signal]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.signal = btn.dataset.signal;
+        renderHud();
+      });
+    });
+
+    ['ttc', 'dist', 'metric', 'hazard', 'phoneNavOn', 'carplayOn', 'navDestInput', 'navManeuverInput'].forEach(id => {
+      const el = $(id);
+      el.addEventListener('input', () => { renderHud(); });
+      el.addEventListener('change', () => { renderHud(); });
+    });
+
+    $('ttcTick').addEventListener('change', () => {
+      if ($('ttcTick').checked) startTtcTick(); else stopTtcTick();
+    });
+
+    $('toggleEngaged').addEventListener('click', function() {
+      const on = this.classList.toggle('active');
+      $('statusPill').textContent = on ? 'ENGAGED' : 'DISENGAGED';
+      $('statusPill').classList.toggle('engaged', on);
+      $('statusPill').classList.toggle('disengaged', !on);
+      $('setSpeedBox').classList.toggle('engaged', on);
+      $('setSpeedBox').classList.toggle('disengaged', !on);
+      this.textContent = on ? 'Engaged' : 'Disengaged';
+    });
+
+    $('modeLocal').addEventListener('click', () => {
+      $('modeLocal').classList.add('active');
+      $('modeLive').classList.remove('active');
+      $('liveRow').style.display = 'none';
+      state.live = false;
+      setStatus('● Local preview — changes update instantly', 'local');
+    });
+
+    $('modeLive').addEventListener('click', () => {
+      $('modeLive').classList.add('active');
+      $('modeLocal').classList.remove('active');
+      $('liveRow').style.display = 'flex';
+      setStatus('● Enter comma IP and click Connect', 'local');
+    });
+
+    $('connectBtn').addEventListener('click', connectDevice);
+    $('pushNavBtn').addEventListener('click', pushNavToDevice);
+    $('pushV2iBtn').addEventListener('click', pushV2iToDevice);
+    $('runDemo').addEventListener('click', runFullDemo);
+    $('stopDemo').addEventListener('click', stopDemo);
+
+    renderHud();
+    startTtcTick();
+  </script>
+</body>
+</html>
