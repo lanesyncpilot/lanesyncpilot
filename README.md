@@ -1,269 +1,603 @@
 # LaneSync Pilot
 
-**LaneSync Pilot** is an advanced open-source driver assistance platform based on openpilot, designed to bring Vehicle-to-Infrastructure (V2I) communication, navigation integration, and connected driving features directly to compatible vehicles.
-
-Built on top of openpilot v0.11.0, LaneSync Pilot extends traditional ADAS functionality by allowing vehicles to interact with smart traffic infrastructure, receive real-time roadway information, and integrate turn-by-turn navigation from a connected mobile device.
+> **The Next Generation of Connected Driving**
+>
+> LaneSync Pilot is an advanced connected-driving platform built on openpilot that combines driver assistance, Vehicle-to-Infrastructure (V2I) communication, intelligent navigation, speed awareness, cloud services, and future smart-city integrations into a single driving experience.
 
 ---
+
+# Table of Contents
+
+1. Introduction
+2. Why LaneSync Pilot
+3. Core Technologies
+4. Vehicle-to-Infrastructure Platform
+5. Navigation System
+6. LaneSync Connect
+7. Speed Intelligence
+8. Smart Routing
+9. Traffic Signal Awareness
+10. Hazard Network
+11. Connectivity Platform
+12. Dashcam Cloud
+13. Mobile Applications
+14. Vehicle Compatibility
+15. Fleet Features
+16. Security & Privacy
+17. System Architecture
+18. Installation
+19. Configuration
+20. Development Roadmap
+21. Smart City Vision
+22. FAQ
+23. Contributing
+24. Disclaimer
+
+---
+
+# Introduction
+
+LaneSync Pilot is an open-source driving assistance platform that expands the capabilities of traditional driver assistance systems by enabling communication between vehicles, mobile devices, navigation systems, and roadside infrastructure.
+
+Most driver assistance systems only react to what the vehicle cameras and sensors can currently see. LaneSync Pilot aims to look beyond the horizon by integrating infrastructure data, navigation information, speed advisories, and connected services into the driving stack.
+
+The result is a smarter vehicle capable of:
+
+* Understanding upcoming intersections
+* Preparing for traffic signals
+* Receiving hazard alerts
+* Following speed limits intelligently
+* Planning navigation-aware maneuvers
+* Communicating with smart city infrastructure
+* Synchronizing with mobile devices
+* Accessing future cloud-based services
+
+---
+
+# Why LaneSync Pilot
+
+Modern vehicles are becoming increasingly connected, but many systems remain isolated.
+
+LaneSync Pilot bridges these systems together.
+
+## Traditional Driver Assistance
+
+Traditional systems rely on:
+
+* Cameras
+* Radar
+* Ultrasonic sensors
+* GPS
+
+These systems only react to conditions visible to the vehicle.
+
+## LaneSync Pilot
+
+LaneSync Pilot adds:
+
+* Roadside Infrastructure
+* Smart Intersections
+* Navigation Awareness
+* Cloud Services
+* Hazard Networks
+* Real-Time Advisories
+* Future Vehicle Networking
+
+This allows the vehicle to make better driving decisions before situations become visible.
+
+---
+
+# Core Technologies
+
+LaneSync Pilot combines multiple technologies:
+
+## Driver Assistance
+
+* Lane Centering
+* Adaptive Cruise Control
+* Curve Handling
+* Path Planning
+
+## Infrastructure Communication
+
+* SPaT (Signal Phase and Timing)
+* MAP Messages
+* Roadside Unit Communication
+* Speed Advisories
+
+## Connected Services
+
+* Mobile Applications
+* Cloud Services
+* Dashcam Platform
+* OTA Updates
+
+## Navigation
+
+* Turn-by-Turn Guidance
+* Route Awareness
+* Lane Selection
+* Traffic Optimization
+
+---
+
+# Vehicle-to-Infrastructure (V2I)
 
 ## Overview
 
-LaneSync Pilot combines:
+Vehicle-to-Infrastructure communication enables vehicles to receive information from traffic systems, road sensors, and connected infrastructure.
 
-* Advanced lane centering
-* Adaptive cruise control support
-* Navigation guidance
-* Vehicle-to-Infrastructure communication
-* Speed limit awareness
-* Connected device services
-* Future cloud dashcam capabilities
+Instead of waiting until a traffic light becomes visible, the vehicle can already know:
 
-The goal is to create a safer, smarter, and more connected driving experience while maintaining compatibility with upstream openpilot releases whenever possible.
+* Current light state
+* Time remaining
+* Upcoming signal phase
+* Speed recommendations
 
 ---
 
-## Repository Structure
+## Traffic Signal Integration
+
+Supported traffic signal data:
+
+* Red Lights
+* Yellow Lights
+* Green Lights
+* Countdown Timers
+* Pedestrian Phases
+* Protected Turn Signals
+
+---
+
+## Example
+
+Approaching an intersection:
 
 ```text
-V2I-for-Comma/
-├── lanesync-pilot/
-│
-├── system/
-│   ├── v2i/
-│   │   ├── v2i_daemon.py
-│   │   ├── signal_receiver.py
-│   │   ├── speed_advisory.py
-│   │   ├── hazard_alerts.py
-│   │   └── phone_nav_bridge.py
-│
-├── tools/
-│   ├── v2i/
-│   │   ├── rsu_simulator.py
-│   │   ├── intersection_simulator.py
-│   │   ├── hud_preview.py
-│   │   ├── ios_setup/
-│   │   └── test_scenarios/
-│
-├── att/
-│   ├── modem_profiles/
-│   └── carrier_configs/
-│
-├── tmobile/
-│   ├── modem_profiles/
-│   └── carrier_configs/
-│
-├── verizon/
-│   ├── modem_profiles/
-│   └── carrier_configs/
-│
-├── docs/
-│   ├── LANESYNC.md
-│   ├── V2I.md
-│   ├── NAVIGATION.md
-│   ├── CONNECTIVITY.md
-│   └── DEVELOPMENT.md
-│
-└── README.md
+Current Speed: 45 MPH
+
+Traffic Light:
+GREEN
+
+Time Remaining:
+18 Seconds
+
+Recommended Speed:
+43 MPH
+
+Status:
+Proceed Through Intersection
 ```
 
 ---
 
-# Key Features
+## Smart Speed Advisory
 
-## Vehicle-to-Infrastructure (V2I)
+LaneSync Pilot can calculate optimal speed recommendations.
 
-LaneSync Pilot can communicate with roadside infrastructure systems to improve situational awareness and driving efficiency.
+Examples:
 
-### Supported Data Types
-
-* Traffic signal phase and timing (SPaT)
-* Roadside unit (RSU) broadcasts
-* Speed recommendations
-* Construction alerts
-* Hazard notifications
-* School zones
-* Emergency vehicle alerts
-* Temporary road restrictions
-* Lane closure information
-
-### Driver Benefits
-
-* Advance traffic light awareness
-* Reduced stop-and-go traffic
-* Improved speed planning
-* Enhanced hazard visibility
-* Better energy efficiency
-* Smoother autonomous driving behavior
+* Maintain speed to pass on green
+* Reduce speed to avoid red light stop
+* Adjust speed for construction zones
+* Prepare for school zones
 
 ---
 
-## Integrated Navigation
+## Future Infrastructure Support
 
-LaneSync Pilot includes a phone-to-device navigation bridge.
+Planned:
 
-Supported sources include:
-
-* Apple Maps
-* Google Maps
-* Waze
-* Organic Maps
-* OpenStreetMap-based navigation apps
-
-Navigation data is transmitted from the phone to the comma device over a secure local Wi-Fi connection.
-
-### Navigation Features
-
-* Turn-by-turn instructions
-* Lane guidance
-* Route awareness
-* ETA display
-* Upcoming maneuver preview
-* Navigation HUD integration
-* Planner route assistance
+* Connected Railroad Crossings
+* Bridge Warnings
+* Flood Sensors
+* Emergency Vehicle Systems
+* Wrong-Way Driver Alerts
+* Smart Parking Systems
 
 ---
 
-## Speed Limit Intelligence
+# Navigation Platform
 
-LaneSync Pilot continuously monitors roadway speed limits using multiple data sources.
+## Navigation Awareness
 
-### Sources
+Unlike standard openpilot forks, LaneSync Pilot integrates navigation directly into driving decisions.
 
-* OpenStreetMap
-* Roadside speed sign detection
-* Vehicle camera recognition
-* Navigation map data
-* Infrastructure broadcasts
+The planner can understand:
 
-### Features
-
-* Automatic speed limit detection
-* Smart cruise speed adjustments
-* Speed limit display
-* Upcoming speed zone warnings
-* Construction speed zone awareness
-* School zone support
+* Upcoming turns
+* Highway exits
+* Lane changes
+* Roundabouts
+* Intersections
+* Destination routes
 
 ---
 
-## Connectivity Platform
+## Supported Navigation Sources
 
-LaneSync Pilot supports multiple methods of maintaining connectivity between the vehicle and mobile devices.
+### Apple Maps
 
-### Supported Connections
+Supported:
 
-* Wi-Fi Hotspot
-* USB Tethering
-* Bluetooth Companion Link
-* LTE Modems
-* 5G Compatible Modems
+* Turn Instructions
+* Distance Remaining
+* Lane Guidance
+* Arrival Estimates
 
-### Carrier Profiles
+### Google Maps
 
-Included carrier configurations:
+Supported:
+
+* Turn Instructions
+* Route Data
+* Traffic Information
+
+### Waze
+
+Supported:
+
+* Turn Guidance
+* Hazard Reports
+* Traffic Events
+
+### Organic Maps
+
+Supported:
+
+* Offline Navigation
+* OpenStreetMap Data
+
+---
+
+## Navigation HUD
+
+Display:
+
+```text
+Turn Right
+0.4 Miles
+
+Main Street
+
+ETA:
+3:42 PM
+
+Distance:
+14.7 Miles
+```
+
+---
+
+# LaneSync Connect
+
+LaneSync Connect is the communication layer connecting:
+
+* Vehicle
+* Mobile Phone
+* Cloud Services
+* Dashcam Platform
+
+---
+
+## Supported Connections
+
+### Wi-Fi
+
+* Local Navigation Sync
+* Media Transfer
+* Device Pairing
+
+### LTE
+
+Supported:
 
 * AT&T
-* T-Mobile
 * Verizon
+* T-Mobile
 
-Additional carrier profiles can be added through community contributions.
+### Future
 
----
-
-## Driver Assistance Enhancements
-
-### Lane Centering
-
-* Automated lane centering
-* Highway support
-* Curvature prediction
-* Improved path planning
-
-### Adaptive Cruise Control
-
-* Automatic following distance
-* Smooth acceleration profiles
-* Traffic-aware speed control
-* Stop-and-go support
-
-### Navigation-Aware Driving
-
-* Upcoming turn preparation
-* Speed adjustments before turns
-* Route-based lane positioning
-* Intelligent maneuver handling
+* 5G
+* Satellite Internet
+* Vehicle Mesh Networking
 
 ---
 
-## Future Dashcam Platform
+# Speed Intelligence
 
-A cloud-connected dashcam system is currently under development.
+## Multi-Source Speed Detection
 
-### Planned Features
+LaneSync Pilot uses:
 
-* Automatic drive uploads
-* Secure encrypted storage
-* Event-triggered clips
-* Video downloads
-* Shareable incident links
-* Mobile app access
+### Camera Recognition
 
-### Privacy
+Reads:
 
-All uploaded footage will use:
+* Regulatory Signs
+* Temporary Signs
+* School Zones
 
-* End-to-end encryption
-* User-controlled retention
-* Secure authentication
-* Encrypted transport
+### OpenStreetMap
 
-### Storage Policy
+Provides:
 
-* Videos stored for up to 7 days
-* Manual downloads available
-* Automatic expiration after retention period
-* Optional future premium storage plans
+* Posted Speed Limits
+* Road Classifications
+
+### Navigation Data
+
+Provides:
+
+* Route-Based Speed Data
+
+### Infrastructure Systems
+
+Provides:
+
+* Dynamic Speed Advisories
 
 ---
 
-# LaneSync Mobile App
+## Speed Limit Following
 
-A companion mobile application is planned for iOS and Android.
+Optional feature:
 
-### Planned Features
+```text
+Detected Limit:
+55 MPH
 
-* Navigation synchronization
-* Device monitoring
-* Drive history
-* Dashcam access
-* Vehicle status
-* Remote updates
-* Account management
-* Cloud synchronization
+Vehicle Speed:
+58 MPH
+
+Adjustment:
+Reducing Speed
+```
+
+---
+
+## Dynamic Speed Control
+
+Can account for:
+
+* Rain
+* Curves
+* Construction
+* Traffic Density
+
+Future versions may provide adaptive speed recommendations based on roadway conditions.
+
+---
+
+# Smart Routing
+
+LaneSync Pilot can use navigation data to prepare for:
+
+* Exit ramps
+* Highway interchanges
+* Lane merges
+* Construction detours
+
+This improves route consistency and reduces late lane changes.
+
+---
+
+# Traffic Signal Awareness
+
+## Upcoming Intersection Display
+
+```text
+Intersection:
+Broad Street
+
+Signal:
+GREEN
+
+Remaining:
+22 Seconds
+
+Recommended:
+Continue
+```
+
+---
+
+## Red Light Prediction
+
+The system can determine:
+
+* Likelihood of stopping
+* Time to signal change
+* Suggested approach speed
+
+---
+
+# Hazard Network
+
+LaneSync Pilot includes a hazard notification platform.
+
+Future alerts may include:
+
+* Disabled Vehicles
+* Accidents
+* Road Debris
+* Flooding
+* Ice Conditions
+* Construction Zones
+* Emergency Vehicles
+
+---
+
+# Dashcam Cloud
+
+## Overview
+
+LaneSync Dashcam provides secure storage and retrieval of driving footage.
+
+---
+
+## Features
+
+### Automatic Recording
+
+* Continuous Recording
+* Event Recording
+* Manual Capture
+
+### Cloud Sync
+
+* Uploads Important Events
+* Secure Storage
+* Remote Access
+
+### Download Center
+
+Users can download:
+
+* Individual Clips
+* Trips
+* Incident Events
+
+---
+
+## Retention
+
+Default:
+
+* 7 Days Storage
+
+Optional future plans:
+
+* 30 Days
+* 90 Days
+* Unlimited
+
+---
+
+# Security
+
+## Encryption
+
+LaneSync Pilot uses:
+
+* TLS 1.3
+* AES-256 Encryption
+* Secure Device Pairing
+* Account Authentication
+
+---
+
+## Privacy
+
+LaneSync Pilot does not sell:
+
+* Driving Data
+* Location Data
+* Vehicle Information
+
+Users control what information is shared.
+
+---
+
+# Mobile Applications
+
+## iPhone App
+
+Features:
+
+* Navigation Sync
+* Dashcam Downloads
+* Device Monitoring
+* OTA Updates
+* Drive History
+
+---
+
+## Android App
+
+Features:
+
+* Navigation Sync
+* Vehicle Status
+* Dashcam Access
+* Notifications
+
+---
+
+# Fleet Features
+
+Future Enterprise Features:
+
+* Fleet Tracking
+* Vehicle Health Monitoring
+* Central Dashcam Management
+* Driver Analytics
+* Fleet Alerts
+
+---
+
+# Vehicle Compatibility
+
+LaneSync Pilot supports compatible openpilot vehicles.
+
+Future support pages will include:
+
+* Vehicle Database
+* Compatibility Charts
+* Feature Availability
+* Installation Guides
+
+---
+
+# System Architecture
+
+```text
++---------------------+
+| Mobile Application  |
++----------+----------+
+           |
+           v
++---------------------+
+| LaneSync Connect    |
++----------+----------+
+           |
+           v
++---------------------+
+| Navigation Bridge   |
++----------+----------+
+           |
+           v
++---------------------+
+| openpilot Planner   |
++----------+----------+
+           |
+           v
++---------------------+
+| Vehicle Controls    |
++---------------------+
+
+           ^
+           |
++---------------------+
+| V2I Infrastructure  |
++---------------------+
+```
 
 ---
 
 # Installation
 
-## Install During Device Setup
-
-Enter the LaneSync Pilot installer URL during comma device onboarding.
-
----
-
-## Manual Installation
+## Clone Repository
 
 ```bash
-cd /data
-
-git clone https://github.com/yourusername/lanesync-pilot.git openpilot
-
-cd openpilot
-
-git checkout lanesync-main
+git clone https://github.com/lanesync/lanesync-pilot.git
 ```
 
-Restart the device after installation.
+## Install
+
+```bash
+cd lanesync-pilot
+```
 
 ---
 
@@ -275,101 +609,120 @@ Enable V2I:
 params set V2IEnabled 1
 ```
 
-Enable Navigation Bridge:
+Enable Navigation:
 
 ```bash
 params set PhoneNavEnabled 1
 ```
 
-Enable Speed Limit Following:
+Enable Speed Following:
 
 ```bash
 params set SpeedLimitControl 1
 ```
 
-Enable Developer Tools:
+Enable Dashcam:
 
 ```bash
-params set LaneSyncDeveloperMode 1
+params set DashcamEnabled 1
 ```
 
 ---
 
-# Device Settings
+# Development Roadmap
 
-Navigate to:
+## Version 1.0
 
-```text
-Settings
- └── LaneSync Pilot
-      ├── V2I Settings
-      ├── Navigation
-      ├── Connectivity
-      ├── Speed Limits
-      ├── Dashcam
-      ├── Developer Options
-      └── About
-```
+* V2I Foundation
+* Navigation Integration
+* Speed Awareness
 
----
+## Version 2.0
 
-# Version Information
+* Dashcam Cloud
+* Mobile Applications
+* Smart Routing
 
-| Component            | Version           |
-| -------------------- | ----------------- |
-| LaneSync Pilot       | 1.0.0             |
-| Base Platform        | openpilot v0.11.0 |
-| Navigation Bridge    | 1.0               |
-| V2I System           | 1.0               |
-| Connectivity Manager | 1.0               |
+## Version 3.0
+
+* Fleet Platform
+* Smart City Integration
+* Hazard Sharing
+
+## Version 4.0
+
+* Infrastructure Partnerships
+* Vehicle Networking
+* National Coverage Expansion
 
 ---
 
-# Development Goals
+# Smart City Vision
 
-### Phase 1
+LaneSync Pilot aims to become a platform connecting:
 
-* V2I foundation
-* Navigation bridge
-* Speed limit support
-* Carrier connectivity
+* Drivers
+* Vehicles
+* Cities
+* Infrastructure
+* Navigation Services
 
-### Phase 2
+Future smart-city deployments could allow vehicles to interact with thousands of intersections and roadway systems across multiple regions.
 
-* Mobile applications
-* Cloud dashboard
-* Dashcam platform
-* Fleet support
+---
 
-### Phase 3
+# Frequently Asked Questions
 
-* Smart city integrations
-* Municipal traffic systems
-* Infrastructure partnerships
-* Advanced route optimization
+### Is LaneSync Pilot autonomous?
+
+No. Drivers must remain attentive and responsible at all times.
+
+### Does LaneSync Pilot replace openpilot?
+
+No. LaneSync Pilot is built on top of openpilot.
+
+### Does LaneSync Pilot require V2I?
+
+No. V2I is optional.
+
+### Is cloud storage required?
+
+No. Cloud features are optional.
+
+### Does navigation require a phone?
+
+Currently yes.
+
+---
+
+# Contributing
+
+Community contributions are welcome.
+
+Areas of interest:
+
+* V2I Development
+* Navigation Integration
+* Mobile Applications
+* Documentation
+* Testing
+* UI Improvements
+* Vehicle Support
 
 ---
 
 # Credits
 
-LaneSync Pilot is based on the outstanding work of the open-source community and the openpilot project.
+Built on top of openpilot and inspired by the future of connected transportation.
 
-Special thanks to:
-
-* comma.ai
-* The openpilot contributor community
-* OpenStreetMap contributors
-* V2I research organizations
-* Smart transportation developers
+Special thanks to the open-source automotive community, smart transportation researchers, and infrastructure developers helping create safer roads.
 
 ---
 
 # Disclaimer
 
-LaneSync Pilot is experimental driver assistance software.
+LaneSync Pilot is experimental software.
 
-Drivers must remain attentive and responsible for vehicle operation at all times.
+Always keep your hands on the wheel and remain ready to take control of the vehicle immediately.
 
-The software does not make the vehicle autonomous and should only be used in accordance with applicable laws and regulations.
-
-Always keep your hands on the wheel and be prepared to take control immediately.
+Drivers are responsible for safe operation of their vehicles and compliance with local laws and regulations.
